@@ -2,13 +2,11 @@
 
 A Chrome extension built using **TypeScript**, compiled to **JavaScript** for use with **Manifest V3**.
 
----
 
 ## Getting Started
 
 Follow the steps below to set up the project locally.
 
----
 
 ## Install TypeScript
 
