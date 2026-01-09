@@ -1,18 +1,31 @@
 # Resume Fill Application Extension
 
+A Chrome extension built using **TypeScript**, compiled to **JavaScript** for use with **Manifest V3**.
 
-** Installing Typescript**
+---
 
+## Getting Started
+
+Follow the steps below to set up the project locally.
+
+---
+
+## Install TypeScript
+
+Initialize the project and install TypeScript as a development dependency:
+
+```bash
 npm init -y
 npm install --save-dev typescript
+```
 
+## Compiling Typescript
 
-
-** Compiling Typescript -> Javascript **
-
+```bash
 npx tsc
+```
 
-
-** Auto Compile on Save ** 
-
+## Auto Compile on Save
+```bash
 npm run watch
+```
