@@ -1,28 +1,120 @@
 console.log("ResumeFill content script running");
 
-const firstName = document.getElementById("first_name") as HTMLInputElement | null;
-const lastNameInput = document.getElementById("last_name") as HTMLInputElement | null;
-const emailInput = document.getElementById("email") as HTMLInputElement | null;;
-const phoneInput = document.getElementById("phone") as HTMLInputElement | null;;
+function findInputByType(fieldType: "firstName" | "lastName" | "email" | "phone"): HTMLInputElement | null {
+  const keywordsMap: Record<string, string[]> = {
+    firstName: ["first name", "given name", "name", "full name"],
+    lastName: ["last name", "surname", "family name"],
+    email: ["email", "e-mail", "mail"],
+    phone: ["phone", "phone number", "mobile", "tel"]
+  };
 
-function setReactInputValue(
-  input: HTMLInputElement,
-  value: string
-): void {
-  const valueSetter = Object.getOwnPropertyDescriptor(
-    HTMLInputElement.prototype,
-    "value"
-  )?.set;
+  const keywords = keywordsMap[fieldType];
 
-  if (!valueSetter) {
-    throw new Error("Unable to find native input value setter");
+  // Search all input elements on the page
+  const inputs = Array.from(document.querySelectorAll<HTMLInputElement>("input"));
+
+  for (const input of inputs) {
+    const textToCheck = [
+      input.placeholder?.toLowerCase(),
+      input.name?.toLowerCase(),
+      input.id?.toLowerCase(),
+      input.getAttribute("aria-label")?.toLowerCase()
+    ].filter(Boolean) as string[];
+
+    // If any keyword matches any of these
+    if (textToCheck.some(text => keywords.some(k => text.includes(k)))) {
+      return input;
+    }
   }
 
-  valueSetter.call(input, value);
+  // Check labels if nothing found yet
+  const labels = Array.from(document.querySelectorAll("label"));
+  for (const label of labels) {
+    const labelText = label.textContent?.toLowerCase();
+    if (!labelText) continue;
 
-  input.dispatchEvent(
-    new Event("input", { bubbles: true })
-  );
+    if (keywords.some(k => labelText.includes(k))) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        if (input) return input;
+      }
+    }
+  }
+
+  return null; // Nothing found
 }
 
 
+
+function findInput(feildNames: string[]): HTMLInputElement | null {
+
+  for(const name of feildNames){
+    // Try by ID
+
+    const byId = document.getElementById(name) as HTMLInputElement | null;
+    if(byId) return byId;
+
+    // Try by name attribute
+    const byName = document.querySelector<HTMLInputElement>(`Input[name="${name}"]`);
+    if(byName) return byName;
+
+    // Try by placeholder containing the name (case-insensitive)
+    const byPlaceholder = Array.from(document.querySelectorAll<HTMLInputElement>("input"))
+    .find(input => input.placeholder?.toLowerCase().includes(name.toLowerCase()));
+
+    if(byPlaceholder) return byPlaceholder;
+
+    // Try by label text
+    const label = Array.from(document.querySelectorAll("label"))
+    .find(l => l.textContent?.toLowerCase().includes(name.toLowerCase()));
+
+    if(label){
+      const inputId = label.getAttribute("for");
+      if(inputId){
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        if(input) return input;
+      }
+    }
+  }
+
+  return null;
+}
+
+function isLikelyFirstName(input: HTMLInputElement) : boolean {
+
+  const keywords = ["first name", "given name", "name"];
+  return keywords.some(
+    k =>
+      input.placeholder?.toLowerCase().includes(k) ||
+      input.getAttribute("aria-label")?.toLowerCase().includes(k) ||
+      input.name?.toLowerCase().includes(k)
+  )
+}
+
+
+
+/*
+  Setter function for set value to input elements
+
+  To be used throughout the application
+
+*/
+function setReactInputValue(input: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+  if (!setter) throw new Error("Cannot find native input value setter");
+  setter.call(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+// Fill test values
+const firstNameInput = findInputByType("firstName");
+const lastNameInput = findInputByType("lastName");
+const emailInput = findInputByType("email");
+const phoneInput = findInputByType("phone");
+
+// Set values safely
+if (firstNameInput) setReactInputValue(firstNameInput, "Archit");
+if (lastNameInput) setReactInputValue(lastNameInput, "Bhatt");
+if (emailInput) setReactInputValue(emailInput, "archit@example.com");
+if (phoneInput) setReactInputValue(phoneInput, "1234567890");
