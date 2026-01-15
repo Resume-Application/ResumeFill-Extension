@@ -1,4 +1,11 @@
 "use strict";
+/**
+ * Main file to be converted to a content.js to be run as a script for the extension.
+ * -> dist/content.js (after compiling)
+ *
+ * @author Archit Bhatt
+ *
+ */
 console.log("ResumeFill content script running");
 function findInputByType(fieldType) {
     const keywordsMap = {

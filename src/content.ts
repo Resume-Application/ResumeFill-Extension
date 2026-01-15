@@ -6,7 +6,26 @@
  * 
  */
 
+
+// notes: 
+// string simillarities
+// Score every input on the page for how likely it is to be an email field, then pick the highest-confidence match
+// https://chatgpt.com/share/696824a5-9f6c-8003-8041-e67fc5588a3b 
+import { FIELD_PROFILES } from "./feildProfiles";
+
 console.log("ResumeFill content script running");
+
+function getInputSignals(input: HTMLInputElement): string[] {
+  return [
+    input.id,
+    input.name,
+    input.placeholder,
+    input.getAttribute("aria-label")!,
+    input.closest("label")?.textContent!,
+    document.querySelector(`label[for="${input.id}"]`)?.textContent!,
+  ].filter(Boolean) as string[];
+}
+
 
 function findInputByType(fieldType: "firstName" | "lastName" | "email" | "phone"): HTMLInputElement | null {
   const keywordsMap: Record<string, string[]> = {
